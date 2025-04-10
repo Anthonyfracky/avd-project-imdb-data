@@ -1,0 +1,4 @@
+.venv/
+imdb-data/
+outputs/
+__pycache__/
