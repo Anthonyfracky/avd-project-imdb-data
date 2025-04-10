@@ -20,3 +20,12 @@ def read_title_ratings(spark: SparkSession, path: str = "imdb-data/title.ratings
         schema=title_ratings_schema,
         nullValue="\\N"
     )
+
+
+def read_title_akas(spark: SparkSession, path: str = "imdb-data/title.akas.tsv.gz"):
+    return spark.read.csv(
+        path,
+        sep="\t",
+        header=True,
+        nullValue="\\N"
+    )
