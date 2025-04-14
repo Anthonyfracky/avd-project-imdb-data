@@ -1,5 +1,5 @@
 from pyspark.sql import SparkSession
-from schemas import title_basics_schema, title_ratings_schema
+from schemas import title_basics_schema, title_ratings_schema, title_principals_schema
 
 
 def read_title_basics(spark: SparkSession, path: str = "imdb-data/title.basics.tsv.gz"):
@@ -27,5 +27,15 @@ def read_title_akas(spark: SparkSession, path: str = "imdb-data/title.akas.tsv.g
         path,
         sep="\t",
         header=True,
+        nullValue="\\N"
+    )
+
+
+def read_title_principals(spark: SparkSession, path: str = "imdb-data/title.principals.tsv.gz"):
+    return spark.read.csv(
+        path,
+        sep="\t",
+        header=True,
+        schema=title_principals_schema,
         nullValue="\\N"
     )

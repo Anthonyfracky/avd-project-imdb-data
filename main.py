@@ -1,7 +1,8 @@
 import os
-from reader import read_title_basics, read_title_ratings, read_title_akas
+from reader import read_title_basics, read_title_ratings, read_title_akas, read_title_principals
 import questions.anton_f_questions as q
 import questions.arsen_b_questions as q2
+import questions.andrian_v_questions as q3
 from utils import configure_spark_session
 from analyzer import analyze_basics, analyze_ratings
 
@@ -9,6 +10,7 @@ from analyzer import analyze_basics, analyze_ratings
 def main():
     os.makedirs("outputs/anton_f", exist_ok=True)
     os.makedirs("outputs/arsen_b", exist_ok=True)
+    os.makedirs("outputs/andrian_v", exist_ok=True)
 
     spark = configure_spark_session()
     spark.sparkContext.setLogLevel("ERROR")
@@ -16,6 +18,7 @@ def main():
     basics = read_title_basics(spark)
     ratings = read_title_ratings(spark)
     akas = read_title_akas(spark)
+    principals = read_title_principals(spark)
 
     print(f"Loaded title.basics with {basics.count()} rows")
     print(f"Loaded title.ratings with {ratings.count()} rows")
@@ -50,6 +53,19 @@ def main():
     q2.group_by_decade_count(basics)
     q2.top5_movies_per_genre(basics, ratings)
     q2.most_voted_movie_per_genre(basics, ratings)
+
+    print("=== ANDRIAN'S QUESTIONS ===")
+    # === ANDRIAN'S QUESTIONS ===
+    q3.filter_2020_movies(basics)
+    q3.filter_animated_movies(basics)
+    q3.filter_french_titles(akas)
+    q3.filter_multi_season_series(basics)
+    q3.join_titles_with_multiple_languages(akas, basics)
+    q3.join_principals_top_movies(basics, ratings, principals)
+    q3.group_by_genre_title_type_count(basics)
+    q3.group_by_decade_avg_rating(basics, ratings)
+    q3.rank_actors_by_movie_count(principals)
+    q3.top_titles_by_votes_per_year(basics, ratings)
 
     spark.stop()
 
