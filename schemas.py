@@ -26,3 +26,9 @@ title_principals_schema = StructType([
     StructField("job", StringType(), True),
     StructField("characters", StringType(), True),
 ])
+
+title_crew_schema = StructType([
+    StructField("tconst", StringType(), True),
+    StructField("directors", StringType(), True),
+    StructField("writers", StringType(), True)
+])

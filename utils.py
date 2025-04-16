@@ -15,7 +15,7 @@ def configure_spark_session():
         .getOrCreate()
 
 
-def save_dataframe(df: DataFrame, output_path: str, format_type="csv"):
+def save_dataframe(df: DataFrame, output_path: str):
     """
     Save a DataFrame to disk and display a sample of it.
 
@@ -34,63 +34,7 @@ def save_dataframe(df: DataFrame, output_path: str, format_type="csv"):
     row_count = df.count()
     print(f"Total rows: {row_count}")
 
-    full_path = f"file://{os.path.abspath(output_path)}"
-
     try:
-
-        if format_type == "csv":
-            df.coalesce(1).write.mode("overwrite").option(
-                "header", "true").csv(output_path)
-        else:
-            df.coalesce(1).write.mode("overwrite").format(
-                format_type).save(output_path)
-
-        print(f"Successfully saved {row_count} rows to {output_path}")
-
-        if os.path.exists(output_path):
-            files = os.listdir(output_path)
-            print(f"Files in directory: {files}")
-            if not any(f for f in files if not f.startswith('.')):
-                print(f"Warning: No visible files found in {output_path}")
-        else:
-            print(
-                f"Warning: Directory {output_path} does not exist after write operation")
-
+        df.toPandas().to_csv(output_path+".csv")
     except Exception as e:
         print(f"Error saving data to {output_path}: {str(e)}")
-
-        try:
-            print("Attempting alternative save method...")
-
-            alt_path = output_path.replace('\\', '/')
-
-            if format_type == "csv":
-                df.coalesce(1).write.mode("overwrite").option(
-                    "header", "true").csv(alt_path)
-            else:
-                df.coalesce(1).write.mode("overwrite").format(
-                    format_type).save(alt_path)
-
-            print(f"Alternative save method succeeded to {alt_path}")
-
-            if os.path.exists(alt_path):
-                files = os.listdir(alt_path)
-                print(f"Files in directory: {files}")
-
-        except Exception as inner_e:
-            print(f"Alternative save method failed: {str(inner_e)}")
-
-            try:
-                print("Attempting to save as text file...")
-                text_path = f"{output_path}_text"
-                os.makedirs(text_path, exist_ok=True)
-
-                df.select([df[col].cast("string") for col in df.columns]) \
-                  .coalesce(1) \
-                  .write.mode("overwrite") \
-                  .text(text_path)
-
-                print(f"Saved as text to {text_path}")
-            except Exception as text_e:
-                print(f"Text file save failed: {str(text_e)}")
-                print("All save attempts failed.")
