@@ -27,6 +27,37 @@ def main():
     name_basics = read_name_basics(spark)
     episodes = read_title_episode(spark)
 
+    # === DATA ANALYSIS (description + statistics) ===
+    print("\n=== DATA ANALYSIS without cleaning ===")
+    print("\n")
+    analyze_df(basics, "Basics", ["startYear", "endYear", "runtimeMinutes"])
+    analyze_df(ratings, "Ratings", ["averageRating", "numVotes"])
+    analyze_df(akas, "Akas", ["region", "language"])
+    analyze_df(principals, "Principals", ["category", "job"])
+    analyze_df(crew, "Crew", ["directors", "writers"])
+    analyze_df(name_basics, "Name_basics", ["birthYear", "primaryProfession"])
+    analyze_df(episodes, "Episode", ["tconst", "parentTconst"])
+
+    # === CLEANING ===
+
+    # 1. title.basics: remove rows with null genres, filter isAdult ∉ {0,1}
+    basics = basics.filter(basics.genres.isNotNull()) \
+                   .filter((basics.isAdult == 0) | (basics.isAdult == 1))
+
+    # 2. title.crew: remove rows where both directors and writers are null
+    crew = crew.filter(crew.directors.isNotNull() | crew.writers.isNotNull())
+
+    # 3. title.episode: drop rows with nulls, remove strange entries (tconst or parentTconst should be valid)
+    title_episode = episodes.dropna(subset=["tconst", "parentTconst", "seasonNumber", "episodeNumber"])
+
+    # 4. title.akas: drop rows with region = \N
+    akas = akas.filter(akas.region.isNotNull())
+
+    # 5. name.basics: drop rows with primaryProfession = \N
+    name_basics = name_basics.filter(name_basics.primaryProfession.isNotNull())
+
+    print("\n")
+    print("\n=== DATA ANALYSIS with cleaning ===")
 
     # === DATA ANALYSIS (description + statistics) ===
     analyze_df(basics, "Basics", ["startYear", "endYear", "runtimeMinutes"])
@@ -35,7 +66,7 @@ def main():
     analyze_df(principals, "Principals", ["category", "job"])
     analyze_df(crew, "Crew", ["directors", "writers"])
     analyze_df(name_basics, "Name_basics", ["birthYear", "primaryProfession"])
-    analyze_df(episodes, "Episodes", ["seasonNumber", "episodeNumber"])
+    analyze_df(title_episode, "Title_episode", ["tconst", "parentTconst"])
 
     print("=== ANTON_F'S QUESTIONS ===")
 
