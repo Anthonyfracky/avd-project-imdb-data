@@ -1,5 +1,6 @@
 from reader import read_title_basics, read_title_ratings
 
+
 def analyze_df(df, title, columns=None):
     if columns is None:
         columns = []
@@ -13,4 +14,3 @@ def analyze_df(df, title, columns=None):
     if columns:
         print(f"=== [{title}] STATISTICS ===")
         df.select(columns).describe().show()
-

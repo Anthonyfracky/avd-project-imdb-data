@@ -10,6 +10,8 @@ def configure_spark_session():
     return SparkSession.builder \
         .appName("IMDB Dataset") \
         .config("spark.ui.enabled", "false") \
+        .config("spark.driver.memory", "4g") \
+        .config("spark.executor.memory", "4g") \
         .config("spark.hadoop.fs.file.impl.disable.cache", "true") \
         .config("spark.hadoop.fs.file.impl", "org.apache.hadoop.fs.LocalFileSystem") \
         .getOrCreate()
