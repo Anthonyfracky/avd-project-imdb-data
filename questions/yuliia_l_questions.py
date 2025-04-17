@@ -1,5 +1,5 @@
 from pyspark.sql import DataFrame
-from pyspark.sql.functions import col, avg, count, rank
+from pyspark.sql.functions import col, avg, count, rank, dense_rank
 from pyspark.sql.window import Window
 from utils import save_dataframe
 
@@ -19,20 +19,27 @@ def filter_movies_by_runtime_and_genre(df: DataFrame):
     save_dataframe(result, "outputs/yuliia_l_questions/filter_runtime_genre")
 
 
-def filter_recent_popular_movies(basics: DataFrame, ratings: DataFrame):
+def filter_group_by_region_episodes(episodes: DataFrame, akas: DataFrame, ratings: DataFrame, basics: DataFrame):
     """
-    Movies released after 2010 with more than 100,000 votes and not marked as adult
+    Episodes released between 2000 and 2020, joined with basics, akas, and ratings, grouped by region
     """
-    joined_df = basics.join(ratings, on="tconst")
+    episodes_with_year = episodes.join(basics, episodes["tconst"] == basics["tconst"]) \
+                                  .select(episodes["tconst"].alias("episodes_tconst"),
+                                          "parentTconst", "seasonNumber", "episodeNumber", "startYear")
 
-    result = joined_df.filter(
-        (col("startYear").cast("int") > 2010) &
-        (col("numVotes").cast("int") > 100000) &
-        (col("isAdult") == "0")
+    episodes_filtered = episodes_with_year.filter(
+        col("seasonNumber").cast("int").isNotNull() &
+        col("episodeNumber").cast("int").isNotNull()
+    ).filter(
+        col("startYear").cast("int").between(2000, 2020)
     )
-
-    print("\n=== [FILTER] Recent popular non-adult movies ===")
-    save_dataframe(result, "outputs/yuliia_l_questions/filter_recent_popular")
+    episodes_with_akas = episodes_filtered.join(akas, episodes_filtered["parentTconst"] == akas["titleId"]) \
+                                          .select("episodes_tconst", "region", "titleId")
+    joined_df = episodes_with_akas.join(ratings, episodes_with_akas["episodes_tconst"] == ratings["tconst"]) \
+                                  .select("region", "episodes_tconst")
+    result = joined_df.groupBy("region").agg(count("*").alias("episode_count"))
+    print("\n=== [FILTER] Episodes by region (2000-2020) ===")
+    save_dataframe(result, "outputs/yuliia_l_questions/filter_group_by_region_episodes")
 
 def filter_episodes_with_title(episodes: DataFrame, basics: DataFrame):
     """
@@ -41,8 +48,8 @@ def filter_episodes_with_title(episodes: DataFrame, basics: DataFrame):
     joined_df = episodes.join(basics, episodes["parentTconst"] == basics["tconst"])
 
     result = joined_df.filter(
-        (col("primaryTitle").like("%War%")) &  # Filter titles containing 'War'
-        (col("startYear").cast("int").between(1990, 2000))  # Filter by release year
+        (col("primaryTitle").like("%War%")) &
+        (col("startYear").cast("int").between(1990, 2000))
     )
 
     print("\n=== [FILTER] Episodes with 'War' in parent title (1990-2000) ===")
@@ -71,7 +78,7 @@ def join_directors_with_crew(crew: DataFrame, name_basics: DataFrame, director_n
     save_dataframe(result, "outputs/yuliia_l_questions/join_directors_with_crew")
 
 
-# === GROUP BY QUESTIONS ===
+# === GROUP BY ===
 
 def group_by_region_language_count(akas: DataFrame):
     """
@@ -91,13 +98,12 @@ def group_by_job_category_count(principals: DataFrame):
     save_dataframe(result, "outputs/yuliia_l_questions/group_by_job_category_count")
 
 
-# === WINDOW FUNCTION QUESTIONS ===
+# === WINDOW FUNCTION ===
 
 def rank_actors_by_episode_count(principals: DataFrame, episodes: DataFrame):
     """
     Rank actors by the number of episodes they have participated in
     """
-    # Select only necessary columns
     principals_filtered = principals.select("tconst", "nconst", "category").filter(col("category") == "actor")
     episodes_filtered = episodes.select("tconst", "episodeNumber")
 
@@ -111,16 +117,17 @@ def rank_actors_by_episode_count(principals: DataFrame, episodes: DataFrame):
     save_dataframe(result, "outputs/yuliia_l_questions/rank_actors_by_episode_count")
 
 
-def top_titles_by_votes_per_region(akas: DataFrame, ratings: DataFrame):
+def top_titles_by_votes_per_region_dense_rank(akas: DataFrame, ratings: DataFrame):
     """
-    Find the top 3 titles with the highest votes for each region
+    Find the top 3 titles with the highest votes for each region using dense_rank
     """
     akas_filtered = akas.select("titleId", "region").filter(col("region").isNotNull())
     ratings_filtered = ratings.select("tconst", "numVotes")
 
     joined_df = akas_filtered.join(ratings_filtered, akas_filtered["titleId"] == ratings_filtered["tconst"])
+
     window_spec = Window.partitionBy("region").orderBy(col("numVotes").desc())
-    result = joined_df.withColumn("rank", rank().over(window_spec)).filter(col("rank") <= 3)
+    result = joined_df.withColumn("dense_rank", dense_rank().over(window_spec)).filter(col("dense_rank") <= 3)
 
     result.persist()
-    save_dataframe(result, "outputs/yuliia_l_questions/top_titles_by_votes_per_region")
+    save_dataframe(result, "outputs/yuliia_l_questions/top_titles_by_votes_per_region_dense_rank")

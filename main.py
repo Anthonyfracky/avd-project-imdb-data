@@ -123,14 +123,14 @@ def main():
 
     # print("=== YULIIA_L'S QUESTIONS ===")
     q5.filter_movies_by_runtime_and_genre(basics)
-    q5.filter_recent_popular_movies(basics, ratings)
+    q5.filter_group_by_region_episodes(episodes, akas, ratings, basics)
     q5.filter_episodes_with_title(episodes, basics)
     q5.join_directors_with_crew(crew, name_basics, "Steven Spielberg")
     q5.join_high_votes_with_akas(ratings, akas)
     q5.group_by_region_language_count(akas)
     q5.group_by_job_category_count(principals)
     q5.rank_actors_by_episode_count(principals, episodes)
-    q5.top_titles_by_votes_per_region(akas, ratings)
+    q5.top_titles_by_votes_per_region_dense_rank(akas, ratings)
 
     spark.stop()
 
