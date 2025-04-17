@@ -32,3 +32,31 @@ title_crew_schema = StructType([
     StructField("directors", StringType(), True),
     StructField("writers", StringType(), True)
 ])
+
+
+name_basics_schema = StructType([
+    StructField("nconst", StringType(), True),
+    StructField("primaryName", StringType(), True),
+    StructField("birthYear", StringType(), True),
+    StructField("deathYear", StringType(), True),
+    StructField("primaryProfession", StringType(), True),
+    StructField("knownForTitles", StringType(), True),
+])
+
+title_akas_schema = StructType([
+    StructField("titleId", StringType(), True),
+    StructField("ordering", StringType(), True),
+    StructField("title", StringType(), True),
+    StructField("region", StringType(), True),
+    StructField("language", StringType(), True),
+    StructField("types", StringType(), True),
+    StructField("attributes", StringType(), True),
+    StructField("isOriginalTitle", StringType(), True),
+])
+
+title_episode_schema = StructType([
+    StructField("tconst", StringType(), True),
+    StructField("parentTconst", StringType(), True),
+    StructField("seasonNumber", StringType(), True),
+    StructField("episodeNumber", StringType(), True),
+])
