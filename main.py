@@ -1,18 +1,20 @@
 import os
 from reader import read_title_basics, read_title_ratings, read_title_akas, read_title_principals, read_title_crew, \
-    read_name_basics
+    read_name_basics, read_title_episode
 import questions.anton_f_questions as q
 import questions.arsen_b_questions as q2
 import questions.andrian_v_questions as q3
 import questions.anton_l_questions as q4
+import questions.yuliia_l_questions as q5
 from utils import configure_spark_session
 from analyzer import analyze_df
 
 
 def main():
-    os.makedirs("outputs/anton_f", exist_ok=True)
+    os.makedirs("outputs/   anton_f", exist_ok=True)
     os.makedirs("outputs/arsen_b", exist_ok=True)
     os.makedirs("outputs/andrian_v", exist_ok=True)
+    os.makedirs("outputs/yuliia_l", exist_ok=True)
 
     spark = configure_spark_session()
     spark.sparkContext.setLogLevel("ERROR")
@@ -26,12 +28,12 @@ def main():
 
 
     # === DATA ANALYSIS (description + statistics) ===
-    analyze_df(basics, "Basics", ["startYear", "endYear", "runtimeMinutes"])
-    analyze_df(ratings, "Ratings", ["averageRating", "numVotes"])
-    analyze_df(akas, "Akas", ["region", "language"])
-    analyze_df(principals, "Principals", ["category", "job"])
-    analyze_df(crew, "Crew", ["directors", "writers"])
-    analyze_df(name_basics, "Name_basics", ["birthYear", "primaryProfession"])
+    # analyze_df(basics, "Basics", ["startYear", "endYear", "runtimeMinutes"])
+    # analyze_df(ratings, "Ratings", ["averageRating", "numVotes"])
+    # analyze_df(akas, "Akas", ["region", "language"])
+    # analyze_df(principals, "Principals", ["category", "job"])
+    # analyze_df(crew, "Crew", ["directors", "writers"])
+    # analyze_df(name_basics, "Name_basics", ["birthYear", "primaryProfession"])
 
     print("=== ANTON_F'S QUESTIONS ===")
 
@@ -72,16 +74,21 @@ def main():
     # q3.rank_actors_by_movie_count(principals)
     # q3.top_titles_by_votes_per_year(basics, ratings)
 
-    print("=== ANTON_L'S QUESTIONS ===")
-    # === ANTON_L'S QUESTIONS ===
-    q4.top_directors_by_high_rated_movies(basics, ratings, crew, name_basics)
-    q4.directors_also_writers(basics, ratings, crew)
-    q4.director_average_ratings(basics, ratings, crew, name_basics)
-    q4.top_directors_by_decade(basics, ratings, crew, name_basics)
-    q4.writers_with_multiple_directors(crew, name_basics)
-    q4.compare_dual_role_vs_separate(basics, ratings, crew)
-    q4.top_genre_by_director(basics, crew, name_basics)
+    # print("=== ANTON_L'S QUESTIONS ===")
+    # # === ANTON_L'S QUESTIONS ===
+    # q4.top_directors_by_high_rated_movies(basics, ratings, crew, name_basics)
+    # q4.directors_also_writers(basics, ratings, crew)
+    # q4.director_average_ratings(basics, ratings, crew, name_basics)
+    # q4.top_directors_by_decade(basics, ratings, crew, name_basics)
+    # q4.writers_with_multiple_directors(crew, name_basics)
+    # q4.compare_dual_role_vs_separate(basics, ratings, crew)
+    # q4.top_genre_by_director(basics, crew, name_basics)
 
+
+    print("=== YULIIA_L'S QUESTIONS ===")
+    q5.filter_movies_by_runtime_and_genre(basics)
+    q5.filter_recent_popular_movies(basics, ratings)
+    q5.filter_movies_with_title(basics)
     spark.stop()
 
 

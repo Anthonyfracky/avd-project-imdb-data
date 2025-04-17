@@ -68,3 +68,14 @@ def read_name_basics(spark: SparkSession, path: str = "imdb-data/name.basics.tsv
     )
     print(f"Loaded name.basics with {name_basics.count()} rows")
     return name_basics
+
+def read_title_episode(spark: SparkSession, path: str = "imdb-data/title.episode.tsv.gz"):
+    title_episode = spark.read.csv(
+        path,
+        sep="\t",
+        header=True,
+        nullValue="\\N"
+    )
+    print(f"Loaded title.episode with {title_episode.count()} rows")
+    return title_episode
+
