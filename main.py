@@ -71,6 +71,7 @@ def main():
     print("=== ANTON_F'S QUESTIONS ===")
 
     #  === ANTON'S QUESTIONS ===
+    q.top_drama_movies_by_region(basics, ratings, akas)
     q.filter_long_movies(basics)
     q.filter_old_non_adult_movies(basics)
     q.filter_comedy_genre(basics)

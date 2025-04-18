@@ -3,7 +3,33 @@ from pyspark.sql.functions import col, row_number, rank, avg
 from utils import save_dataframe
 
 
+# === COMPLEX QUERY ===
+
+def top_drama_movies_by_region(df_titles: DataFrame, df_ratings: DataFrame, df_akas: DataFrame):
+    """
+    Drama movies after 2010 with rating > 8.5 and their distribution by region
+    """
+    filtered = df_titles.filter(
+        (col("genres").contains("Drama")) &
+        (col("startYear") > 2010) &
+        (col("titleType") == "movie")
+    )
+
+    joined = filtered.join(df_ratings, on="tconst") \
+        .filter(col("averageRating") > 8.5)
+
+    df_akas = df_akas.withColumnRenamed("titleId", "tconst")
+
+    with_region = joined.join(df_akas, on="tconst") \
+        .filter(col("region").isNotNull()) \
+        .select("primaryTitle", "averageRating", "region")
+
+    print("\n=== [COMPLEX] Top drama movies >8.5 after 2010 with regions ===")
+    save_dataframe(with_region, "outputs/anton_f/complex_top_drama_by_region")
+
+
 # === FILTERS ===
+
 
 def filter_long_movies(df: DataFrame):
     """
